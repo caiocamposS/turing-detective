@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TURING LABS — Protocolo de Recuperação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- TELA 1: INTRO / STORYTELLING -->
+<div id="screen-intro" class="screen active">
+  <div class="scanlines"></div>
+  <div class="intro-content">
+    <div class="lab-logo">
+      <span class="logo-bracket">[</span>
+      <span class="logo-text">TURING<br>LABS</span>
+      <span class="logo-bracket">]</span>
+    </div>
+    <div class="incident-badge">⚠ INCIDENTE CRÍTICO — NÍVEL 4</div>
+
+    <div class="story-terminal">
+      <div class="terminal-header">
+        <span class="t-dot red"></span>
+        <span class="t-dot yellow"></span>
+        <span class="t-dot green"></span>
+        <span class="terminal-title">// RELATÓRIO_INCIDENTE_#4471.log</span>
+      </div>
+      <div class="terminal-body" id="story-text">
+        <span class="cursor-blink">_</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-start-mission" style="display:none">
+      » ACEITAR MISSÃO
+    </button>
+  </div>
+</div>
+
+<!-- TELA 2: TUTORIAL -->
+<div id="screen-tutorial" class="screen">
+  <div class="scanlines"></div>
+  <div class="game-layout">
+    <header class="game-header">
+      <div class="header-left">
+        <span class="logo-small">[TURING LABS]</span>
+        <span class="phase-label">// TREINAMENTO</span>
+      </div>
+      <div class="header-right">
+        <span class="agent-id">AGENTE: VOCÊ</span>
+      </div>
+    </header>
+
+    <div class="tutorial-container">
+      <div class="case-file">
+        <div class="case-header">
+          <span class="case-tag">DOSSIER</span>
+          <h2 class="case-title">Briefing Técnico — Máquina de Turing</h2>
+        </div>
+
+        <div class="tutorial-steps" id="tutorial-steps">
+          <!-- preenchido via JS -->
+        </div>
+
+        <button class="btn-primary" id="btn-tutorial-done">
+          » INICIAR INVESTIGAÇÃO
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 3: MAPA DE CASOS -->
+<div id="screen-cases" class="screen">
+  <div class="scanlines"></div>
+  <div class="game-layout">
+    <header class="game-header">
+      <div class="header-left">
+        <span class="logo-small">[TURING LABS]</span>
+        <span class="phase-label">// CASOS ATIVOS</span>
+      </div>
+      <div class="header-right">
+        <span id="cases-score">CASOS RESOLVIDOS: 0/3</span>
+      </div>
+    </header>
+
+    <div class="cases-container">
+      <div class="cases-intro">
+        <p>O vírus <code>V-NULL</code> corrompeu <strong>3 máquinas</strong> no laboratório. Analise cada uma e restaure o funcionamento correto.</p>
+      </div>
+      <div class="cases-grid" id="cases-grid">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 4: JOGO (INVESTIGAÇÃO) -->
+<div id="screen-game" class="screen">
+  <div class="scanlines"></div>
+  <div class="game-layout">
+    <header class="game-header">
+      <div class="header-left">
+        <span class="logo-small">[TURING LABS]</span>
+        <span class="phase-label" id="game-phase-label">// CASO #1</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-small" id="btn-back-cases">← CASOS</button>
+      </div>
+    </header>
+
+    <div class="investigation-layout">
+
+      <!-- COLUNA ESQUERDA: briefing + fita -->
+      <div class="left-panel">
+        <div class="panel-box">
+          <div class="panel-box-header">BRIEFING DO CASO</div>
+          <div id="case-briefing"></div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-box-header">FITA DE ENTRADA</div>
+          <div class="tape-container">
+            <div class="tape-track" id="tape-display"></div>
+            <div class="head-indicator">▲<br><span>CABEÇA</span></div>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-box-header">LOG DE EXECUÇÃO</div>
+          <div class="execution-log" id="execution-log">
+            <span class="log-hint">[ Execute a máquina para ver o log ]</span>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <button class="btn-control" id="btn-step">▶ PASSO</button>
+          <button class="btn-control btn-run" id="btn-run">▶▶ EXECUTAR</button>
+          <button class="btn-control btn-reset" id="btn-reset">↺ RESETAR</button>
+        </div>
+      </div>
+
+      <!-- COLUNA DIREITA: tabela de transições -->
+      <div class="right-panel">
+        <div class="panel-box flex-grow">
+          <div class="panel-box-header">
+            TABELA DE TRANSIÇÕES
+            <span class="corrupted-tag">⚠ CORROMPIDA</span>
+          </div>
+          <div class="transition-hint" id="transition-hint"></div>
+          <div class="transition-table-wrapper">
+            <table class="transition-table" id="transition-table">
+              <thead>
+                <tr>
+                  <th>Estado Atual</th>
+                  <th>Lê</th>
+                  <th>Escreve</th>
+                  <th>Move</th>
+                  <th>Próx. Estado</th>
+                </tr>
+              </thead>
+              <tbody id="transition-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-box-header">STATUS DA MÁQUINA</div>
+          <div class="machine-status">
+            <div class="status-item">
+              <span class="status-label">Estado:</span>
+              <span class="status-value" id="status-state">q0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Posição:</span>
+              <span class="status-value" id="status-pos">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Símbolo:</span>
+              <span class="status-value" id="status-symbol">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Resultado:</span>
+              <span class="status-value" id="status-result">-</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary btn-submit" id="btn-submit">
+          ✓ SUBMETER CORREÇÃO
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TELA 5: VITÓRIA FINAL -->
+<div id="screen-victory" class="screen">
+  <div class="scanlines"></div>
+  <div class="victory-content">
+    <div class="victory-glitch">SISTEMA RESTAURADO</div>
+    <div class="victory-subtitle">// PROTOCOLO V-NULL NEUTRALIZADO</div>
+    <div class="victory-report">
+      <div class="vr-line">► Todas as 3 máquinas foram reparadas com sucesso.</div>
+      <div class="vr-line">► O laboratório Turing Labs está operacional.</div>
+      <div class="vr-line">► Agente: missão concluída.</div>
+    </div>
+    <div class="victory-concepts">
+      <div class="vc-title">// O QUE VOCÊ APRENDEU</div>
+      <div class="vc-grid">
+        <div class="vc-item">🎞️ Fita com símbolos e cabeça leitora</div>
+        <div class="vc-item">🔄 Estados e transições</div>
+        <div class="vc-item">✍️ Leitura e escrita de símbolos</div>
+        <div class="vc-item">↔️ Movimentação da cabeça (E/D)</div>
+        <div class="vc-item">✅ Estados de aceitação/rejeição</div>
+        <div class="vc-item">🐛 Debug de máquinas com falha</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btn-restart">↺ JOGAR NOVAMENTE</button>
+  </div>
+</div>
+
+<!-- MODAL DE RESULTADO -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <button class="btn-primary" id="modal-btn">OK</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
