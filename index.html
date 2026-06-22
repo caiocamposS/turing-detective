@@ -39,56 +39,163 @@
   </div>
 </div>
 
-<!-- TELA 2: TUTORIAL -->
+<!-- TELA 2: TUTORIAL INTERATIVO (usa o mesmo layout do jogo real + pop-ups guiados) -->
 <div id="screen-tutorial" class="screen">
   <div class="scanlines"></div>
   <div class="game-layout">
     <header class="game-header">
       <div class="header-left">
         <span class="logo-small">[TURING LABS]</span>
-        <span class="phase-label">// TREINAMENTO</span>
+        <span class="phase-label">// SIMULADOR DE TREINAMENTO</span>
       </div>
       <div class="header-right">
         <span class="agent-id">AGENTE: VOCÊ</span>
       </div>
     </header>
 
-    <div class="tutorial-container">
-      <div class="case-file">
-        <div class="case-header">
-          <span class="case-tag">DOSSIER</span>
-          <h2 class="case-title">Briefing Técnico — Máquina de Turing</h2>
+    <div class="investigation-layout">
+
+      <div class="left-panel">
+        <div class="panel-box" id="tut-briefing-box">
+          <div class="panel-box-header">BRIEFING DO CASO</div>
+          <div id="tut-case-briefing">
+            <p>Esta é uma máquina de <strong>treinamento</strong>, sem vírus. Use-a para aprender como tudo funciona antes de ir para os casos reais.</p>
+          </div>
         </div>
 
-        <div class="tutorial-steps" id="tutorial-steps">
-          <!-- preenchido via JS -->
+        <div class="panel-box" id="tut-tape-box">
+          <div class="panel-box-header">FITA DE ENTRADA</div>
+          <div class="tape-container">
+            <div class="tape-track" id="tut-tape-display"></div>
+            <div class="head-indicator">▲<br><span>CABEÇA</span></div>
+          </div>
         </div>
 
-        <button class="btn-primary" id="btn-tutorial-done">
-          » INICIAR INVESTIGAÇÃO
+        <div class="panel-box" id="tut-log-box">
+          <div class="panel-box-header">LOG DE EXECUÇÃO</div>
+          <div class="execution-log" id="tut-execution-log">
+            <span class="log-hint">[ Execute a máquina para ver o log ]</span>
+          </div>
+        </div>
+
+        <div class="controls-row" id="tut-controls-row">
+          <button class="btn-control" id="tut-btn-step">▶ PASSO</button>
+          <button class="btn-control btn-run" id="tut-btn-run">▶▶ EXECUTAR</button>
+          <button class="btn-control btn-reset" id="tut-btn-reset">↺ RESETAR</button>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="panel-box flex-grow" id="tut-table-box">
+          <div class="panel-box-header">
+            TABELA DE TRANSIÇÕES
+          </div>
+          <div class="transition-table-wrapper">
+            <table class="transition-table" id="tut-transition-table">
+              <thead>
+                <tr>
+                  <th>Estado Atual</th>
+                  <th>Lê</th>
+                  <th>Escreve</th>
+                  <th>Move</th>
+                  <th>Próx. Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tut-transition-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-box" id="tut-status-box">
+          <div class="panel-box-header">STATUS DA MÁQUINA</div>
+          <div class="machine-status">
+            <div class="status-item">
+              <span class="status-label">Estado:</span>
+              <span class="status-value" id="tut-status-state">q0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Posição:</span>
+              <span class="status-value" id="tut-status-pos">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Símbolo:</span>
+              <span class="status-value" id="tut-status-symbol">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Resultado:</span>
+              <span class="status-value" id="tut-status-result">-</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary btn-submit" id="btn-tutorial-done" style="display:none">
+          » IR PARA OS CASOS
         </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OVERLAY DE POP-UPS GUIADOS -->
+  <div id="tutorial-overlay" class="tutorial-overlay">
+    <div id="tutorial-spotlight" class="tutorial-spotlight"></div>
+    <div id="tutorial-popup" class="tutorial-popup">
+      <div class="tp-step-tag" id="tp-step-tag">PASSO 1/8</div>
+      <h3 class="tp-title" id="tp-title"></h3>
+      <p class="tp-body" id="tp-body"></p>
+      <div class="tp-action-hint" id="tp-action-hint" style="display:none"></div>
+      <div class="tp-footer">
+        <button class="btn-small" id="tp-skip">PULAR TUTORIAL</button>
+        <button class="btn-primary tp-next-btn" id="tp-next">PRÓXIMO »</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TELA 3: MAPA DE CASOS -->
+<!-- TELA 3: MAPA DE MUNDOS -->
+<div id="screen-worlds" class="screen">
+  <div class="scanlines"></div>
+  <div class="game-layout">
+    <header class="game-header">
+      <div class="header-left">
+        <span class="logo-small">[TURING LABS]</span>
+        <span class="phase-label">// SETORES DO LABORATÓRIO</span>
+      </div>
+      <div class="header-right">
+        <span id="worlds-score">PROGRESSO GERAL: 0/7</span>
+      </div>
+    </header>
+
+    <div class="cases-container">
+      <div class="cases-intro">
+        <p>O vírus <code>V-NULL</code> se espalhou por <strong>3 setores</strong> do laboratório. Cada setor possui máquinas com falhas cada vez mais graves. Escolha um setor para começar.</p>
+      </div>
+      <div class="worlds-grid" id="worlds-grid">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 4: MAPA DE CASOS (DE UM MUNDO) -->
 <div id="screen-cases" class="screen">
   <div class="scanlines"></div>
   <div class="game-layout">
     <header class="game-header">
       <div class="header-left">
         <span class="logo-small">[TURING LABS]</span>
-        <span class="phase-label">// CASOS ATIVOS</span>
+        <span class="phase-label" id="cases-phase-label">// SETOR 1</span>
       </div>
       <div class="header-right">
+        <button class="btn-small" id="btn-back-worlds">← SETORES</button>
         <span id="cases-score">CASOS RESOLVIDOS: 0/3</span>
       </div>
     </header>
 
     <div class="cases-container">
-      <div class="cases-intro">
-        <p>O vírus <code>V-NULL</code> corrompeu <strong>3 máquinas</strong> no laboratório. Analise cada uma e restaure o funcionamento correto.</p>
+      <div class="cases-intro" id="cases-intro-text">
+        <p>O vírus <code>V-NULL</code> corrompeu <strong>3 máquinas</strong> neste setor. Analise cada uma e restaure o funcionamento correto.</p>
       </div>
       <div class="cases-grid" id="cases-grid">
         <!-- preenchido via JS -->
@@ -107,7 +214,7 @@
         <span class="phase-label" id="game-phase-label">// CASO #1</span>
       </div>
       <div class="header-right">
-        <button class="btn-small" id="btn-back-cases">← CASOS</button>
+        <button class="btn-small" id="btn-back-cases">← VOLTAR</button>
       </div>
     </header>
 
@@ -205,18 +312,19 @@
     <div class="victory-glitch">SISTEMA RESTAURADO</div>
     <div class="victory-subtitle">// PROTOCOLO V-NULL NEUTRALIZADO</div>
     <div class="victory-report">
-      <div class="vr-line">► Todas as 3 máquinas foram reparadas com sucesso.</div>
-      <div class="vr-line">► O laboratório Turing Labs está operacional.</div>
+      <div class="vr-line">► Todas as 7 máquinas foram reparadas com sucesso.</div>
+      <div class="vr-line">► Os 3 setores do Turing Labs estão operacionais.</div>
       <div class="vr-line">► Agente: missão concluída.</div>
     </div>
     <div class="victory-concepts">
       <div class="vc-title">// O QUE VOCÊ APRENDEU</div>
       <div class="vc-grid">
-        <div class="vc-item">🎞️ Fita com símbolos e cabeça leitora</div>
+        <div class="vc-item">🎞️ Fita infinita com símbolos e cabeça leitora</div>
         <div class="vc-item">🔄 Estados e transições</div>
         <div class="vc-item">✍️ Leitura e escrita de símbolos</div>
         <div class="vc-item">↔️ Movimentação da cabeça (E/D)</div>
         <div class="vc-item">✅ Estados de aceitação/rejeição</div>
+        <div class="vc-item">🧩 Regras faltando e múltiplas falhas</div>
         <div class="vc-item">🐛 Debug de máquinas com falha</div>
       </div>
     </div>
