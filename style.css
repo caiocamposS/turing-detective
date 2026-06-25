@@ -298,14 +298,16 @@ body {
 
 .tutorial-popup {
   position: fixed;
-  width: 340px;
+  width: clamp(260px, 90vw, 340px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   background: var(--bg2);
   border: 1px solid var(--green);
   box-shadow: 0 0 30px var(--green-glow), 0 10px 30px #00000088;
   padding: 1.4rem;
   z-index: 502;
   pointer-events: all;
-  transition: top 0.4s ease, left 0.4s ease;
+  transition: top 0.25s ease, left 0.25s ease;
 }
 .tp-step-tag { color: var(--green); font-size: 0.7rem; letter-spacing: 0.15em; margin-bottom: 0.5rem; }
 .tp-title { font-family: var(--font-title); font-size: 1rem; color: var(--white); margin-bottom: 0.6rem; }
@@ -348,9 +350,6 @@ body {
   50% { box-shadow: 0 0 0 8px transparent; }
 }
 
-@media (max-width: 700px) {
-  .tutorial-popup { width: 88vw; left: 6vw !important; }
-}
 .cases-container {
   flex: 1; padding: 2rem;
   display: flex; flex-direction: column; gap: 1.5rem; align-items: center;
@@ -535,13 +534,6 @@ body {
   color: var(--amber);
 }
 .tape-cell.blank { color: var(--grey); font-size: 0.7rem; }
-
-.head-indicator {
-  text-align: center;
-  color: var(--green);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-}
 
 /* LOG */
 .execution-log {

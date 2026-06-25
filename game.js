@@ -176,14 +176,14 @@ const CASES = [
     difficulty: 2,
     input: ['a','a','a','_'],
     initialState: 'q0',
-    hint: 'Há DOIS campos corrompidos nesta tabela, em linhas diferentes. Revise escrita, direção e próximo estado linha por linha.',
+    hint: 'Há DOIS campos corrompidos nesta tabela, em linhas diferentes. Revise escrita e próximo estado linha por linha — um deles trava a máquina em loop, o outro deixa a fita errada.',
     buggedTransitions: [
       { state:'q0', read:'a', write:'a', move:'D', next:'q0', editable:['write'] },
-      { state:'q0', read:'_', write:'_', move:'E', next:'qA', editable:['move'] },
+      { state:'q0', read:'_', write:'_', move:'D', next:'q0', editable:['next'] },
     ],
     bugs: [
       { row: 0, field: 'write', correct: 'b' },
-      { row: 1, field: 'move', correct: 'D' },
+      { row: 1, field: 'next', correct: 'qA' },
     ],
   },
 
@@ -494,30 +494,53 @@ function showTutorialStep(idx) {
 function positionPopupNear(rect) {
   const popup = document.getElementById('tutorial-popup');
   popup.style.transform = 'none';
-  const margin = 20;
-  const popupWidth = 340;
+  // make sure it's visible (not display:none) so we can measure it accurately
+  popup.style.visibility = 'hidden';
+  popup.style.left = '0px';
+  popup.style.top = '0px';
+
+  const margin = 16;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
+  // Measure the popup AFTER content is set, using its real rendered size
+  // (CSS media queries may have already resized it for small screens).
+  const popupRect = popup.getBoundingClientRect();
+  const popupWidth = popupRect.width;
+  const popupHeight = popupRect.height;
+
   let left, top;
 
-  if (rect.right + margin + popupWidth < vw) {
+  // Try right side of target
+  if (rect.right + margin + popupWidth + margin < vw) {
     left = rect.right + margin;
-    top = Math.max(margin, Math.min(rect.top, vh - 280));
-  } else if (rect.left - margin - popupWidth > 0) {
+    top = rect.top;
+  // Try left side of target
+  } else if (rect.left - margin - popupWidth - margin > 0) {
     left = rect.left - margin - popupWidth;
-    top = Math.max(margin, Math.min(rect.top, vh - 280));
+    top = rect.top;
+  // Fall back to below the target
+  } else if (rect.bottom + margin + popupHeight + margin < vh) {
+    left = rect.left;
+    top = rect.bottom + margin;
+  // Fall back to above the target
+  } else if (rect.top - margin - popupHeight - margin > 0) {
+    left = rect.left;
+    top = rect.top - margin - popupHeight;
+  // Last resort: center of the screen
   } else {
-    left = Math.max(margin, Math.min(rect.left, vw - popupWidth - margin));
-    if (rect.bottom + 260 < vh) {
-      top = rect.bottom + margin;
-    } else {
-      top = Math.max(margin, rect.top - 260 - margin);
-    }
+    left = (vw - popupWidth) / 2;
+    top = (vh - popupHeight) / 2;
   }
+
+  // Final safety clamp: never let the popup escape the viewport, no matter
+  // what window size or popup size we ended up with.
+  left = Math.max(margin, Math.min(left, vw - popupWidth - margin));
+  top = Math.max(margin, Math.min(top, vh - popupHeight - margin));
 
   popup.style.left = left + 'px';
   popup.style.top = top + 'px';
+  popup.style.visibility = 'visible';
 }
 
 document.getElementById('tp-next').addEventListener('click', () => {
