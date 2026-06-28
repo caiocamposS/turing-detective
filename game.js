@@ -361,6 +361,7 @@ let running = false;
 let runInterval = null;
 let written = new Set();
 let editableTransitions = [];
+let missingRowUidCounter = 0;
 
 // Tutorial-specific runtime (kept isolated from real game state)
 let tutTape = [];
@@ -751,6 +752,11 @@ document.getElementById('btn-back-worlds').addEventListener('click', () => {
   renderWorlds();
 });
 
+document.getElementById('btn-replay-tutorial').addEventListener('click', () => {
+  showScreen('screen-tutorial');
+  startGuidedTutorial();
+});
+
 // ===========================
 //  CASES MAP (within a world)
 // ===========================
@@ -772,11 +778,9 @@ function renderCases() {
       <div class="cc-difficulty">
         DIFICULDADE: ${[1,2,3].map(n=>`<span class="dot${n<=c.difficulty?' active-dot':''}"></span>`).join('')}
       </div>
-      ${solved ? '<div class="cc-solved-tag">✓ RESOLVIDO</div>' : ''}
+      ${solved ? '<div class="cc-solved-tag">✓ RESOLVIDO — clique para rejogar</div>' : ''}
     `;
-    if (!solved) {
-      card.addEventListener('click', () => startCase(c));
-    }
+    card.addEventListener('click', () => startCase(c));
     grid.appendChild(card);
   });
 }
@@ -789,6 +793,7 @@ function startCase(c) {
   stopRun();
 
   editableTransitions = c.buggedTransitions.map(t => ({ ...t }));
+  missingRowUidCounter = 0;
 
   document.getElementById('game-phase-label').textContent = `// ${c.number}`;
   document.getElementById('case-briefing').innerHTML = `
@@ -1042,6 +1047,19 @@ function renderTransitionTable() {
       tag.className = 'missing-tag';
       tag.textContent = '⚠ REGRA FALTANDO — PREENCHA';
       tr.lastChild.appendChild(tag);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn-remove-row';
+      removeBtn.title = 'Remover esta regra';
+      removeBtn.textContent = '✕';
+      removeBtn.dataset.uid = t._uid;
+      removeBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const uid = +e.target.dataset.uid;
+        editableTransitions = editableTransitions.filter(row => !(row.missing && row._uid === uid));
+        renderTransitionTable();
+      });
+      tr.lastChild.appendChild(removeBtn);
     }
 
     tbody.appendChild(tr);
@@ -1056,7 +1074,7 @@ function renderTransitionTable() {
     addBtn.className = 'btn-add-row';
     addBtn.textContent = '+ ADICIONAR REGRA FALTANTE';
     addBtn.addEventListener('click', () => {
-      editableTransitions.push({ state:'', read:'', write:'', move:'D', next:'', missing:true });
+      editableTransitions.push({ state:'', read:'', write:'', move:'D', next:'', missing:true, _uid: missingRowUidCounter++ });
       renderTransitionTable();
     });
     wrapper.appendChild(addBtn);
@@ -1170,5 +1188,91 @@ window.addEventListener('resize', () => {
   if (document.getElementById('screen-tutorial').classList.contains('active') &&
       document.getElementById('tutorial-overlay').classList.contains('dimmed')) {
     showTutorialStep(tutorialStepIndex);
+  }
+});
+
+// ===========================
+//  TRILHA SONORA (arquivo de áudio real, sem copyright)
+//  Faixa: "Suspense" — tocada em loop, com fade-in/fade-out suave
+//  ao ligar/desligar, e preferência salva no localStorage.
+// ===========================
+let bgMusic = null;
+let soundOn = false;
+let musicFadeInterval = null;
+
+const MUSIC_TARGET_VOLUME = 0.55;
+
+function getBgMusic() {
+  if (!bgMusic) {
+    bgMusic = new Audio('audio/suspense.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0;
+    bgMusic.preload = 'auto';
+  }
+  return bgMusic;
+}
+
+function fadeMusicTo(targetVolume, durationMs) {
+  const audio = getBgMusic();
+  clearInterval(musicFadeInterval);
+  const steps = 20;
+  const stepTime = durationMs / steps;
+  const startVolume = audio.volume;
+  const delta = (targetVolume - startVolume) / steps;
+  let stepCount = 0;
+
+  musicFadeInterval = setInterval(() => {
+    stepCount++;
+    let next = startVolume + delta * stepCount;
+    if (next < 0) next = 0;
+    if (next > 1) next = 1;
+    audio.volume = next;
+    if (stepCount >= steps) {
+      clearInterval(musicFadeInterval);
+      audio.volume = targetVolume;
+      if (targetVolume === 0) audio.pause();
+    }
+  }, stepTime);
+}
+
+function setSoundOn(on) {
+  soundOn = on;
+  const btn = document.getElementById('btn-sound-toggle');
+  const audio = getBgMusic();
+
+  if (on) {
+    audio.play().catch(() => {
+      // Autoplay bloqueado pelo navegador — vai tentar de novo no próximo gesto do usuário.
+    });
+    fadeMusicTo(MUSIC_TARGET_VOLUME, 1200);
+    btn.textContent = '🔊';
+    btn.classList.add('playing');
+  } else {
+    fadeMusicTo(0, 600);
+    btn.textContent = '🔇';
+    btn.classList.remove('playing');
+  }
+
+  try { localStorage.setItem('turingLabsSoundOn', on ? '1' : '0'); } catch(e) {}
+}
+
+document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+  setSoundOn(!soundOn);
+});
+
+// Restaura a preferência de som do jogador. Navegadores bloqueiam áudio
+// até haver uma interação real do usuário, então só ligamos de fato
+// após o primeiro clique/tecla na página (se a preferência salva for "ligado").
+window.addEventListener('load', () => {
+  let preferred = false;
+  try { preferred = localStorage.getItem('turingLabsSoundOn') === '1'; } catch(e) {}
+  if (preferred) {
+    const startOnFirstGesture = () => {
+      setSoundOn(true);
+      document.removeEventListener('click', startOnFirstGesture);
+      document.removeEventListener('keydown', startOnFirstGesture);
+    };
+    document.addEventListener('click', startOnFirstGesture);
+    document.addEventListener('keydown', startOnFirstGesture);
   }
 });

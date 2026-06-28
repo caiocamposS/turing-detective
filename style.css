@@ -34,7 +34,43 @@ body {
   min-height: 100vh;
 }
 
-/* SCANLINES overlay */
+/* ===========================
+   SOUND TOGGLE BUTTON
+   =========================== */
+.btn-sound-toggle {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1100;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px #00000066;
+}
+.btn-sound-toggle:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 16px var(--green-glow);
+}
+.btn-sound-toggle.playing {
+  animation: sound-pulse 2s infinite;
+}
+@keyframes sound-pulse {
+  0%,100% { box-shadow: 0 0 0 0 var(--green-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ===========================
+   SCANLINES overlay
+   =========================== */
 .scanlines {
   position: fixed; inset: 0; z-index: 999; pointer-events: none;
   background: repeating-linear-gradient(
@@ -425,7 +461,8 @@ body {
 }
 .case-card:hover { border-color: var(--amber); transform: translateY(-2px); box-shadow: 0 8px 24px #00000055; }
 .case-card:hover::before { width: 5px; }
-.case-card.solved { border-color: var(--green-dim); cursor: default; }
+.case-card.solved { border-color: var(--green-dim); cursor: pointer; }
+.case-card.solved:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: 0 8px 24px #00000055; }
 .case-card.solved::before { background: var(--green); }
 
 .cc-number { color: var(--amber); font-size: 0.7rem; letter-spacing: 0.2em; margin-bottom: 0.5rem; }
@@ -632,12 +669,17 @@ tr.missing-row td {
   background: #ff335510;
   border-bottom: 1px dashed var(--red-dim);
 }
+tr.missing-row td:last-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
 .missing-tag {
   display: inline-block;
   color: var(--red);
   font-size: 0.65rem;
   letter-spacing: 0.08em;
-  margin-left: 0.4rem;
 }
 .cell-edit.empty-required::placeholder { color: var(--red-dim); }
 
@@ -653,6 +695,27 @@ tr.missing-row td {
   padding: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.btn-remove-row {
+  background: transparent;
+  border: 1px solid var(--red-dim);
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.btn-remove-row:hover {
+  background: var(--red-dim);
+  color: #fff;
+  box-shadow: 0 0 8px #ff335555;
 }
 .btn-add-row:hover { border-color: var(--green-dim); color: var(--green); }
 
